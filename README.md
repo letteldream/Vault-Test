@@ -33,7 +33,6 @@ git clone https://github.com/letteldream/vault-project.git
 2. Install Dependencies:
 
 ```sh
-cd vault-project
 npm install
 ```
 
