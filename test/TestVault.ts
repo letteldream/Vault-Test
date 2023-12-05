@@ -30,21 +30,20 @@ describe("Vault", function () {
     await vault.connect(owner).whitelistToken(token.getAddress());
     expect(await vault.whitelistedTokens(token.getAddress())).to.be.true;
 
-    console.log(
-      "await vault.whitelistedTokens(token.getAddress())",
-      await vault.whitelistedTokens(token.getAddress())
-    );
   });
 
   it("should allow deposit and withdrawal", async function () {
-
     await token.transfer(user.address, 1000);
     await token.connect(user).approve(vault.getAddress(), 1000);
-    await vault.connect(user).deposit(token.getAddress(), 500);
-    expect(await token.balanceOf(vault.getAddress())).to.equal(500);
+    await vault.connect(user).deposit(token.getAddress(), 1000);
+    
+    const userBalanceBefore = await vault.connect(user).getDepositBalance(user.address);
+    expect(userBalanceBefore).to.equal(1000);
 
     await vault.connect(user).withdraw(token.getAddress(), 250);
-    expect(await token.balanceOf(user.address)).to.equal(750);
+    
+    const userBalanceAfter = await vault.connect(user).getDepositBalance(user.address);
+    expect(userBalanceAfter).to.equal(750);
   });
 
   it("should allow only admin to pause and unpause", async function () {

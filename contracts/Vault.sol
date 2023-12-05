@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 
 contract Vault is Ownable, Pausable {
     mapping(address => bool) public whitelistedTokens;
+    mapping(address => uint256) private depositBalances;
 
     event Deposit(address indexed user, address indexed token, uint256 amount);
     event Withdrawal(address indexed user, address indexed token, uint256 amount);
@@ -25,15 +26,27 @@ contract Vault is Ownable, Pausable {
     }
 
     function deposit(address _token, uint256 _amount) external whenNotPaused {
+
         require(_amount > 0, "Vault: deposit amount must be greater than zero");
+
         IERC20(_token).transferFrom(msg.sender, address(this), _amount);
+        depositBalances[msg.sender] += _amount;
+
         emit Deposit(msg.sender, _token, _amount);
     }
 
     function withdraw(address _token, uint256 _amount) external onlyWhitelistedToken(_token) whenNotPaused {
+
         require(_amount > 0, "Vault: withdrawal amount must be greater than zero");
+
         IERC20(_token).transfer(msg.sender, _amount);
+        depositBalances[msg.sender] -= _amount;
+
         emit Withdrawal(msg.sender, _token, _amount);
+    }
+
+    function getDepositBalance(address account) external view returns (uint256) {
+        return depositBalances[account];
     }
 
     function pause() external onlyAdmin {
