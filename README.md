@@ -69,8 +69,6 @@ smart contract. Include examples of depositing, withdrawing, pausing, and
 whitelisting tokens.
 
 ```
-typescript
-// Example usage in TypeScript test script
 await vault.connect(owner).addToWhiteList(token.address);
 await vault.connect(user).deposit(token.address, parseEther('100'));
 await vault.connect(user).withdraw(token.address, parseEther('50'));
