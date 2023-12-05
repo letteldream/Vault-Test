@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-// import { , Vault } from "../typechain-types";
 import { Vault } from "../typechain-types/contracts/Vault";
 import { MintableERC20 } from "../typechain-types/contracts/mocks/MintableERC20";
 import { parseEther } from "ethers";
@@ -18,7 +17,7 @@ describe("Vault", function () {
     const Vault = await ethers.getContractFactory("Vault");
     vault = await Vault.deploy();
 
-    const Token = await ethers.getContractFactory("MintableERC20"); // Replace with your ERC-20 token contract
+    const Token = await ethers.getContractFactory("MintableERC20");
     token = await Token.deploy("MockERC20", "MockERC20", parseEther("10000"));
   });
 
