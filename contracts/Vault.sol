@@ -4,8 +4,9 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
+import "./dependencides/ReentrancyGuard.sol";
 
-contract Vault is Ownable, Pausable {
+contract Vault is Ownable, Pausable, ReentrancyGuard {
     mapping(address => bool) public whitelistedTokens;
     mapping(address => mapping(address => uint256)) public balances;
 
@@ -35,9 +36,9 @@ contract Vault is Ownable, Pausable {
         require(_amount > 0, "Vault: withdrawal amount must be greater than zero");
         require(balances[_token][msg.sender] >= _amount, "Vault: withdraw amount is greater than balance");
 
-        IERC20(_token).transfer(msg.sender, _amount);
         balances[_token][msg.sender] -= _amount;
-
+        IERC20(_token).transfer(msg.sender, _amount);
+        
         emit Withdrawal(msg.sender, _token, _amount);
     }
 
