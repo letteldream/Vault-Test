@@ -37,14 +37,17 @@ describe("Vault", function () {
 
     const userBalanceBefore = await vault
       .connect(user)
-      .getDepositBalance(token.getAddress(), user.address);
+      .balances(token.getAddress(), user.address);
     expect(userBalanceBefore).to.equal(1000);
 
+    await expect(
+      vault.connect(user).withdraw(token.getAddress(), 2000)
+    ).to.be.rejectedWith("Vault: withdraw amount is greater than balance");
     await vault.connect(user).withdraw(token.getAddress(), 250);
 
     const userBalanceAfter = await vault
       .connect(user)
-      .getDepositBalance(token.getAddress(), user.address);
+      .balances(token.getAddress(), user.address);
     expect(userBalanceAfter).to.equal(750);
   });
 
