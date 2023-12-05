@@ -7,15 +7,10 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 
 contract Vault is Ownable, Pausable {
     mapping(address => bool) public whitelistedTokens;
-    mapping(address => uint256) private depositBalances;
+    mapping(address => mapping(address => uint256)) private depositBalances;
 
     event Deposit(address indexed user, address indexed token, uint256 amount);
     event Withdrawal(address indexed user, address indexed token, uint256 amount);
-
-    modifier onlyAdmin() {
-        require(owner() == _msgSender(), "Vault: caller is not the owner");
-        _;
-    }
 
     modifier onlyWhitelistedToken(address _token) {
         require(whitelistedTokens[_token], "Vault: token is not whitelisted");
@@ -30,7 +25,7 @@ contract Vault is Ownable, Pausable {
         require(_amount > 0, "Vault: deposit amount must be greater than zero");
 
         IERC20(_token).transferFrom(msg.sender, address(this), _amount);
-        depositBalances[msg.sender] += _amount;
+        depositBalances[_token][msg.sender] += _amount;
 
         emit Deposit(msg.sender, _token, _amount);
     }
@@ -40,29 +35,29 @@ contract Vault is Ownable, Pausable {
         require(_amount > 0, "Vault: withdrawal amount must be greater than zero");
 
         IERC20(_token).transfer(msg.sender, _amount);
-        depositBalances[msg.sender] -= _amount;
+        depositBalances[_token][msg.sender] -= _amount;
 
         emit Withdrawal(msg.sender, _token, _amount);
     }
 
-    function getDepositBalance(address account) external view returns (uint256) {
-        return depositBalances[account];
+    function getDepositBalance(address _token, address account) external view returns (uint256) {
+        return depositBalances[_token][account];
     }
 
-    function pause() external onlyAdmin {
+    function pause() external onlyOwner {
         _pause();
     }
 
-    function unpause() external onlyAdmin {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
-    function whitelistToken(address _token) external onlyAdmin {
+    function addToWhiteList(address _token) external onlyOwner {
         require(_token != address(0), "Vault: token address cannot be zero");
         whitelistedTokens[_token] = true;
     }
 
-    function removeTokenFromWhitelist(address _token) external onlyAdmin {
+    function removeFromWhiteList(address _token) external onlyOwner {
         whitelistedTokens[_token] = false;
     }
 }

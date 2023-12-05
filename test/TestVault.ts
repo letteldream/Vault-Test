@@ -23,47 +23,45 @@ describe("Vault", function () {
 
   it("should allow only admin to whitelist tokens", async function () {
     expect(await vault.whitelistedTokens(token.getAddress())).to.be.false;
-    await expect(
-      vault.connect(user).whitelistToken(token.getAddress())
-    ).to.be.revertedWith("Vault: caller is not the owner");
+    await expect(vault.connect(user).addToWhiteList(token.getAddress())).to.be
+      .reverted;
 
-    await vault.connect(owner).whitelistToken(token.getAddress());
+    await vault.connect(owner).addToWhiteList(token.getAddress());
     expect(await vault.whitelistedTokens(token.getAddress())).to.be.true;
-
   });
 
   it("should allow deposit and withdrawal", async function () {
     await token.transfer(user.address, 1000);
     await token.connect(user).approve(vault.getAddress(), 1000);
     await vault.connect(user).deposit(token.getAddress(), 1000);
-    
-    const userBalanceBefore = await vault.connect(user).getDepositBalance(user.address);
+
+    const userBalanceBefore = await vault
+      .connect(user)
+      .getDepositBalance(token.getAddress(), user.address);
     expect(userBalanceBefore).to.equal(1000);
 
     await vault.connect(user).withdraw(token.getAddress(), 250);
-    
-    const userBalanceAfter = await vault.connect(user).getDepositBalance(user.address);
+
+    const userBalanceAfter = await vault
+      .connect(user)
+      .getDepositBalance(token.getAddress(), user.address);
     expect(userBalanceAfter).to.equal(750);
   });
 
   it("should allow only admin to pause and unpause", async function () {
     expect(await vault.paused()).to.be.false;
 
-    await expect(vault.connect(user).pause()).to.be.revertedWith(
-      "Vault: caller is not the owner"
-    );
+    await expect(vault.connect(user).pause()).to.be.reverted;
 
     await vault.connect(owner).pause();
     expect(await vault.paused()).to.be.true;
 
-    await expect(vault.connect(user).deposit(token.getAddress(), 500)).to.be.reverted;
+    await expect(vault.connect(user).deposit(token.getAddress(), 500)).to.be
+      .reverted;
 
-    await expect(vault.connect(user).unpause()).to.be.revertedWith(
-      "Vault: caller is not the owner"
-    );
+    await expect(vault.connect(user).unpause()).to.be.reverted;
 
     await vault.connect(owner).unpause();
     expect(await vault.paused()).to.be.false;
   });
-
 });
